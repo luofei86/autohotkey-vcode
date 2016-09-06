@@ -1,0 +1,2 @@
+如果demo无法使用，请下载最新的DLL
+http://dll.uuwise.com/index.php?n=ApiDoc.DLLdownLoad
