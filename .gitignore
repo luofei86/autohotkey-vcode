@@ -2,3 +2,6 @@
 *.bak
 Debug/*
 Release/*
+ipch/*
+dll.opensdf
+dll.sdf

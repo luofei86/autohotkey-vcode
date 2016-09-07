@@ -1,5 +1,7 @@
 #include "stdafx.h"
 #include <iostream>
+#include <sstream>
+#include <fstream>
 #include <stdio.h>
 #include "cdef.h"
 //#include "windows.h"
@@ -241,13 +243,36 @@ CString CheckResult(const CString& strResult, int softid, int codeID, const CStr
 		//校验不通过
 		else
 		{
-			return "结果校验不正确";
+			//return "结果校验不正确";
+			return "Inspect Result Failed!";
 		}
 	}
 }
 
+void WriteResultFile(_TCHAR *_filename, int result, CString info, CString code)
+{
+	std::ofstream file;
+	file.open(_filename);
+	file << result;
+	file << "\n";
+	file << info;
+	file << "\n";
+	file << code;
+	file.close();
+}
+
 int _tmain(int argc, _TCHAR* argv[])
 {
+	//基本不可能发生
+	if (argc != 3)
+	{
+		return -9;
+	}
+
+	int result;
+	CString info;
+	CString code;
+	//printf(argv[1]);
 	TCHAR exeFullPath[MAX_PATH]; // MAX_PATH在WINDEF.h中定义了，等于260
 	memset(exeFullPath,0,MAX_PATH);
 	::GetModuleFileName(NULL,exeFullPath,MAX_PATH);
@@ -264,51 +289,72 @@ int _tmain(int argc, _TCHAR* argv[])
 	CString strCheckKey = "32F1C86B-E64C-4EAF-8BC1-C142570008BC";
 	if(!CheckDll(softID, softKEY, strDllPath, strCheckKey))
 	{
-		printf("Dll文件校验失败。");
-		system("pause");
+		//printf("Dll文件校验失败。");
+		//system("pause");
+		/*info = "Failed inspce dll file.";
+		result = -1;*/
+		//write to result file.
+		WriteResultFile(argv[2], -1, "Failed inspect dll file.", "");
+		return 0;
 		//return 0;
 	}
-	else
+	/*else
 	{
-		printf("Dll文件校验成功。");
-	}
+	printf("dll文件校验成功。");
+	}*/
+
+	//printf("Argument length:" + argc);
 
 	char *userName,*userPassword;
     int loginStatus,codeID,score;
 	char recoResult[50] = {0};
 
-    userName="UserName";		//用户名
-    userPassword="PassWord";	//密码
+    userName = "zthy232";		//用户名
+	userPassword = "123456";	//密码
+	userPassword = "123456error";	//密码
 
-    printf("初始化优优uu_setSoftInfoA\n");
+  //  printf("初始化优优uu_setSoftInfoA\n");
 
 	uu_setSoftInfoA(softID,softKEY);
-    printf("\n调用登录函数uu_loginA\n");
+  //  printf("\n调用登录函数uu_loginA\n");
     loginStatus=uu_loginA(userName,userPassword);
 
     if(loginStatus>0)
 	{
         score=uu_getScoreA(userName,userPassword);
-        printf("恭喜您，登录成功，您的用户ID为：%d,您帐户内剩余题分为：%d\n",loginStatus,score);
-        printf("开始调用识别函数,请耐心等待返回结果……\n");
+        /*printf("恭喜您，登录成功，您的用户id为：%d,您帐户内剩余题分为：%d\n",loginstatus,score);
+        printf("开始调用识别函数,请耐心等待返回结果……\n");*/
 
-        codeID=uu_recognizeByCodeTypeAndPathA("c:\\1.jpg", 8001, recoResult);
+        codeID = uu_recognizeByCodeTypeAndPathA(argv[1], 8001, recoResult);
         if(codeID > 0)
 		{
 			CString strCodeResult = CheckResult(recoResult, softID, codeID, strCheckKey);
-            printf("识别完成,图片ID为：%d,识别结果为：%s",codeID,strCodeResult);
+            //printf("识别完成,图片ID为：%d,识别结果为：%s",codeID,strCodeResult);
+			WriteResultFile(argv[2], 0, "Distinct vcode success.", strCodeResult);
+			//printf(strCodeResult);
         }
 		else
 		{
-            printf("识别出现错误,返回的错误代码为：%d,resutErrorCode:%s\n", codeID, recoResult);
+            //printf("识别出现错误,返回的错误代码为：%d,resutErrorCode:%s\n", codeID, recoResult);
+			CString info = "Distinct vcode failed. Status:" + codeID;
+			info = info + ", resultErrorCode:" + recoResult;
+			WriteResultFile(argv[2], -3, info, "");
         }
     }
 	else
 	{
-        printf("对不起，登录失败，错误代码为：%d\n",loginStatus);
+		//info = StringFormat("Login failed. Status:%d", loginStatus);
+        //printf("对不起，登录失败，错误代码为：%d\n",loginStatus);
+		//CString info = "Login failed. Status:" + loginStatus;
+		std::ostringstream oss;
+		oss << loginStatus;
+		//std::cout << oss.str();
+		CString info = "Login failed. Status:";
+		info += oss.str();
+		WriteResultFile(argv[2], -2, info, "");
     }
 
-	system("pause");
+	//system("pause");
     return 0;
 }
 
