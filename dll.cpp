@@ -289,19 +289,9 @@ int _tmain(int argc, _TCHAR* argv[])
 	CString strCheckKey = "32F1C86B-E64C-4EAF-8BC1-C142570008BC";
 	if(!CheckDll(softID, softKEY, strDllPath, strCheckKey))
 	{
-		//printf("Dll文件校验失败。");
-		//system("pause");
-		/*info = "Failed inspce dll file.";
-		result = -1;*/
-		//write to result file.
 		WriteResultFile(argv[2], -1, "Failed inspect dll file.", "");
 		return 0;
-		//return 0;
 	}
-	/*else
-	{
-	printf("dll文件校验成功。");
-	}*/
 
 	//printf("Argument length:" + argc);
 
@@ -311,46 +301,31 @@ int _tmain(int argc, _TCHAR* argv[])
 
     userName = "zthy232";		//用户名
 	userPassword = "123456";	//密码
-	userPassword = "123456error";	//密码
 
   //  printf("初始化优优uu_setSoftInfoA\n");
 
 	uu_setSoftInfoA(softID,softKEY);
-  //  printf("\n调用登录函数uu_loginA\n");
     loginStatus=uu_loginA(userName,userPassword);
-
     if(loginStatus>0)
 	{
         score=uu_getScoreA(userName,userPassword);
-        /*printf("恭喜您，登录成功，您的用户id为：%d,您帐户内剩余题分为：%d\n",loginstatus,score);
-        printf("开始调用识别函数,请耐心等待返回结果……\n");*/
-
         codeID = uu_recognizeByCodeTypeAndPathA(argv[1], 8001, recoResult);
         if(codeID > 0)
 		{
 			CString strCodeResult = CheckResult(recoResult, softID, codeID, strCheckKey);
-            //printf("识别完成,图片ID为：%d,识别结果为：%s",codeID,strCodeResult);
 			WriteResultFile(argv[2], 0, "Distinct vcode success.", strCodeResult);
-			//printf(strCodeResult);
         }
 		else
 		{
-            //printf("识别出现错误,返回的错误代码为：%d,resutErrorCode:%s\n", codeID, recoResult);
-			CString info = "Distinct vcode failed. Status:" + codeID;
-			info = info + ", resultErrorCode:" + recoResult;
+			CString info;
+			info.Format(_T("Distinct vcode failed. Status:%d"), codeID);
 			WriteResultFile(argv[2], -3, info, "");
         }
     }
 	else
 	{
-		//info = StringFormat("Login failed. Status:%d", loginStatus);
-        //printf("对不起，登录失败，错误代码为：%d\n",loginStatus);
-		//CString info = "Login failed. Status:" + loginStatus;
-		std::ostringstream oss;
-		oss << loginStatus;
-		//std::cout << oss.str();
-		CString info = "Login failed. Status:";
-		info += oss.str();
+		CString info;
+		info.Format(_T("Login failed. Status:%d"), loginStatus);
 		WriteResultFile(argv[2], -2, info, "");
     }
 
